@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 — unreleased
+## 0.1.0 — 2026-10-05
 
 - Saves memory and continuity notes at a context threshold (default 80 %), also mid-turn.
 - Saves memory when the 5-hour or weekly usage limit reaches 85 %.

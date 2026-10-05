@@ -4,7 +4,6 @@
 
 [English](README.md) · **Español**
 
-> **Estado: beta (v0.1).** Funciona y tiene pruebas, pero es nuevo. Si algo falla, [abre un issue](https://github.com/SIPAMOCHA1985/elephant-mode/issues).
 
 Activa el Modo Elefante: un plugin para Claude Code que hace que **guarde su memoria antes de olvidar**. Cuando la conversación se llena, Claude anota lo importante y luego se compacta solo. Una pequeña pantalla flotante muestra qué tan cerca estás de cada límite.
 
