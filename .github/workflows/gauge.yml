@@ -1,0 +1,28 @@
+# Builds the committed gauge binary from source and attests its provenance,
+# so users can verify widget/bin/Gauge with `gh attestation verify`.
+name: build-gauge
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [widget/Gauge.swift, widget/build.sh]
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: widget/build.sh
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: widget/bin/Gauge
+      - name: Commit the built binary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add widget/bin/Gauge
+          git diff --cached --quiet || git commit -m "build: gauge binary from ${GITHUB_SHA::7} [skip ci]"
+          git push
