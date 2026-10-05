@@ -40,7 +40,7 @@ with tempfile.TemporaryDirectory() as tmp:
     assert run("Stop", hook(high, "s2", stop_hook_active=True), data) == "", "never loops"
 
     out = run("PostToolUse", hook(high, "s3"), data)
-    assert out["hookSpecificOutput"]["additionalContext"].startswith("[compact-autopilot]"), "mid-turn path"
+    assert out["hookSpecificOutput"]["additionalContext"].startswith("[elephant-mode]"), "mid-turn path"
 
     run("PreCompact", hook(high), data)
     assert not (data / "backups").exists(), "backups are OFF by default"

@@ -1,13 +1,13 @@
 # Privacy
 
-compact-autopilot runs entirely on your computer. **It makes no network requests and sends no data anywhere** — not to the author, not to Anthropic, not to any third party. You can verify this: the code is a few short files in `scripts/` and `widget/Gauge.swift`.
+elephant-mode runs entirely on your computer. **It makes no network requests and sends no data anywhere** — not to the author, not to Anthropic, not to any third party. You can verify this: the code is a few short files in `scripts/` and `widget/Gauge.swift`.
 
 ## What it reads
 
 - The **end of your conversation transcript**, to compute how full the context is. It parses those lines in memory and keeps only the token counts; it never stores message text (unless you turn `backups` on).
 - The **status data Claude Code passes to the statusline**: context %, 5-hour and weekly limit %, reset times, session duration.
 
-## What it writes (in the plugin data directory, `~/.claude/plugins/data/compact-autopilot-*/`)
+## What it writes (in the plugin data directory, `~/.claude/plugins/data/elephant-mode-*/`)
 
 | File | Contents | Kept |
 |---|---|---|
@@ -27,4 +27,4 @@ Not directed at users under 18.
 
 ## Contact
 
-Questions: open an issue at https://github.com/SIPAMOCHA1985/compact-autopilot/issues
+Questions: open an issue at https://github.com/SIPAMOCHA1985/elephant-mode/issues

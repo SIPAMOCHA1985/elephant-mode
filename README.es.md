@@ -1,8 +1,10 @@
-# compact-autopilot
+# 🐘 Elephant Mode
+
+> *Los elefantes nunca olvidan. Ahora Claude Code tampoco.*
 
 [English](README.md) · **Español**
 
-Un plugin para Claude Code que hace que **guarde su memoria antes de olvidar**. Cuando la conversación se llena, Claude anota lo importante y luego se compacta solo. Una pequeña pantalla flotante muestra qué tan cerca estás de cada límite.
+Activa el Modo Elefante: un plugin para Claude Code que hace que **guarde su memoria antes de olvidar**. Cuando la conversación se llena, Claude anota lo importante y luego se compacta solo. Una pequeña pantalla flotante muestra qué tan cerca estás de cada límite.
 
 <p>
   <img src="docs/gauge-ok-es.png" width="360" alt="Pantalla: contexto 42%, sesión 5h 31%, semana 55%, 418K tokens">
@@ -32,8 +34,8 @@ Todo es automático y silencioso. No hay comandos que recordar.
 En Claude Code:
 
 ```
-/plugin marketplace add SIPAMOCHA1985/compact-autopilot
-/plugin install compact-autopilot@compact-autopilot
+/plugin marketplace add SIPAMOCHA1985/elephant-mode
+/plugin install elephant-mode@elephant-mode
 ```
 
 Reinicia Claude Code y listo. En la primera sesión, el plugin:
@@ -84,15 +86,15 @@ Se cambia en `/config` (opciones del plugin):
 ## Desinstalar
 
 ```
-/compact-autopilot:uninstall
-/plugin uninstall compact-autopilot
+/elephant-mode:uninstall
+/plugin uninstall elephant-mode
 ```
 
 El primer comando quita solo lo que agregó el plugin (su línea de estado y el umbral de compact) y cierra la pantalla. Si te lo saltas, la pantalla igual se cierra sola cuando el plugin ya no está. Pero la línea de estado queda en tu `settings.json` apuntando a un archivo borrado: quita `statusLine` de ahí o restaura la copia que hizo el plugin.
 
 ## Preguntas frecuentes
 
-**¿En qué se diferencia de claude-mem?** [claude-mem](https://github.com/thedotmack/claude-mem) es un sistema completo de memoria: graba todo y lo comprime con IA. compact-autopilot es lo contrario: unos pocos scripts, sin dependencias ni base de datos, y usa la memoria propia de Claude Code. Hace una sola cosa: guardar memoria *antes* de compactar, en el % que tú elijas. Se pueden usar juntos.
+**¿En qué se diferencia de claude-mem?** [claude-mem](https://github.com/thedotmack/claude-mem) es un sistema completo de memoria: graba todo y lo comprime con IA. elephant-mode es lo contrario: unos pocos scripts, sin dependencias ni base de datos, y usa la memoria propia de Claude Code. Hace una sola cosa: guardar memoria *antes* de compactar, en el % que tú elijas. Se pueden usar juntos.
 
 **¿Gasta tokens extra?** Un paso extra por cada ciclo, mientras Claude escribe sus notas. A cambio, como compacta antes, los mensajes que siguen pesan menos.
 

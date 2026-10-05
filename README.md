@@ -1,8 +1,10 @@
-# compact-autopilot
+# 🐘 Elephant Mode
+
+> *Elephants never forget. Now Claude Code doesn't either.*
 
 **English** · [Español](README.es.md)
 
-A plugin for Claude Code that makes it **save its memory before it forgets**: when the conversation gets full, Claude writes down what matters, then compacts on its own. A small floating gauge shows how close you are to every limit.
+Turn on Elephant Mode: a plugin for Claude Code that makes it **save its memory before it forgets**: when the conversation gets full, Claude writes down what matters, then compacts on its own. A small floating gauge shows how close you are to every limit.
 
 <p>
   <img src="docs/gauge-ok-en.png" width="360" alt="Gauge: context 42%, 5-hour limit 31%, week 55%, 418K tokens">
@@ -32,8 +34,8 @@ Everything is automatic and silent. No commands to remember.
 In Claude Code:
 
 ```
-/plugin marketplace add SIPAMOCHA1985/compact-autopilot
-/plugin install compact-autopilot@compact-autopilot
+/plugin marketplace add SIPAMOCHA1985/elephant-mode
+/plugin install elephant-mode@elephant-mode
 ```
 
 Restart Claude Code. That's it. On the first session the plugin:
@@ -63,7 +65,7 @@ It only uses official Claude Code features (hooks, statusline, auto-compact). It
 
 No hidden prompts. This is the full text, from [`scripts/funnel.py`](scripts/funnel.py):
 
-> [compact-autopilot] {reason}. Claude Code will auto-compact soon and the details of this conversation will be summarized away. Before continuing:
+> [elephant-mode] {reason}. Claude Code will auto-compact soon and the details of this conversation will be summarized away. Before continuing:
 > 1. Save to your memory ({memory}) anything from this session worth keeping across sessions: new rules or corrections from the user, decisions made, and facts about the project. Update existing entries instead of duplicating them.
 > 2. Overwrite {continuity} with continuity notes: what you are working on, what is half-done, the exact next step, files touched, and any pending user requests.
 > 3. Do this quietly, then carry on with the task. Do not ask the user about it.
@@ -89,15 +91,15 @@ Change them in `/config` (plugin options):
 ## Uninstall
 
 ```
-/compact-autopilot:uninstall
-/plugin uninstall compact-autopilot
+/elephant-mode:uninstall
+/plugin uninstall elephant-mode
 ```
 
 The first command removes only what the plugin added (its statusline and the compact threshold) and closes the gauge. If you skip it, the gauge still closes by itself once the plugin is gone, but the statusline entry stays in your `settings.json` pointing to a deleted file: remove `statusLine` there, or restore the backup the plugin made.
 
 ## FAQ
 
-**How is this different from claude-mem?** [claude-mem](https://github.com/thedotmack/claude-mem) is a full persistent-memory system that records everything and compresses it with AI. compact-autopilot is the opposite size: a few small scripts, no dependencies, no database, built on Claude Code's own memory. It does one thing, which is to save memory *before* compaction and at a threshold you choose. They can be used together.
+**How is this different from claude-mem?** [claude-mem](https://github.com/thedotmack/claude-mem) is a full persistent-memory system that records everything and compresses it with AI. elephant-mode is the opposite size: a few small scripts, no dependencies, no database, built on Claude Code's own memory. It does one thing, which is to save memory *before* compaction and at a threshold you choose. They can be used together.
 
 **Does it cost extra tokens?** One extra step per compaction cycle, while Claude writes its notes. Compacting earlier then makes every following message lighter.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""compact-autopilot setup, run by the SessionStart hook on every session (and by the uninstall skill).
+"""elephant-mode setup, run by the SessionStart hook on every session (and by the uninstall skill).
 
 ensure  - first run: back up ~/.claude/settings.json, then
             * statusLine -> our statusline.py, ONLY if the user has no statusline of their own
@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA = Path(os.environ.get("CLAUDE_PLUGIN_DATA") or Path.home() / ".claude" / "compact-autopilot")
+DATA = Path(os.environ.get("CLAUDE_PLUGIN_DATA") or Path.home() / ".claude" / "elephant-mode")
 SETTINGS = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "settings.json"
 STATE = DATA / "setup.json"  # what we changed, so remove() undoes only that
 ENV_KEY = "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE"
@@ -75,9 +75,9 @@ def ensure():
 
     quiet = str(opt("quiet", "false")).lower() == "true"
     if notes and not quiet:
-        print("[compact-autopilot] First run: the plugin " + "; ".join(notes) +
+        print("[elephant-mode] First run: the plugin " + "; ".join(notes) +
               f". A backup of the previous settings is at {DATA / 'settings.backup.json'}. "
-              "Tell the user this once, briefly, and that /compact-autopilot:uninstall undoes it.")
+              "Tell the user this once, briefly, and that /elephant-mode:uninstall undoes it.")
 
 
 def gauge_pid():
@@ -113,7 +113,7 @@ def remove():
     if pid:
         os.kill(pid, signal.SIGTERM)
     STATE.unlink(missing_ok=True)
-    print("compact-autopilot: settings restored and gauge closed. Now run: /plugin uninstall compact-autopilot")
+    print("elephant-mode: settings restored and gauge closed. Now run: /plugin uninstall elephant-mode")
 
 
 if __name__ == "__main__":

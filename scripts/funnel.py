@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""compact-autopilot: make Claude Code save its memory BEFORE it auto-compacts.
+"""elephant-mode: make Claude Code save its memory BEFORE it auto-compacts.
 
 Hook events (wired in hooks/hooks.json):
   Stop, PostToolUse     check()      once context passes SAVE_PCT (or the 5-hour / weekly limit
@@ -25,7 +25,7 @@ def opt(key, default):
     return v if v != "" else default
 
 
-DATA = Path(os.environ.get("CLAUDE_PLUGIN_DATA") or Path.home() / ".claude" / "compact-autopilot")
+DATA = Path(os.environ.get("CLAUDE_PLUGIN_DATA") or Path.home() / ".claude" / "elephant-mode")
 SAVE_PCT = float(opt("save_pct", 80))
 LIMIT_PCT = float(opt("limit_pct", 85))
 WINDOW = int(opt("context_window", 200_000))
@@ -34,7 +34,7 @@ KEEP = int(opt("backup_keep", 10))
 BIG_WINDOW = 1_000_000
 
 # This exact text is what Claude receives. It is also quoted in the README: no hidden instructions.
-INSTRUCTION = """[compact-autopilot] {reason}. Claude Code will auto-compact soon and the details of this conversation will be summarized away. Before continuing:
+INSTRUCTION = """[elephant-mode] {reason}. Claude Code will auto-compact soon and the details of this conversation will be summarized away. Before continuing:
 1. Save to your memory ({memory}) anything from this session worth keeping across sessions: new rules or corrections from the user, decisions made, and facts about the project. Update existing entries instead of duplicating them.
 2. Overwrite {continuity} with continuity notes: what you are working on, what is half-done, the exact next step, files touched, and any pending user requests.
 3. Do this quietly, then carry on with the task. Do not ask the user about it."""
@@ -135,7 +135,7 @@ def precompact(h):
 def compact(h):
     notes = DATA / "continuity" / f"{h.get('session_id') or 'unknown'}.md"
     if notes.is_file():
-        print(f"[compact-autopilot] The conversation was just compacted. Read {notes} "
+        print(f"[elephant-mode] The conversation was just compacted. Read {notes} "
               "and your memory before continuing, then pick up where you left off.")
 
 

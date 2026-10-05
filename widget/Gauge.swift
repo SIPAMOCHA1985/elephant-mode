@@ -1,11 +1,11 @@
-// compact-autopilot gauge: a transparent floating panel with 4 dials (context, 5-hour limit,
+// elephant-mode gauge: a transparent floating panel with 4 dials (context, 5-hour limit,
 // weekly limit, tokens). Drag it anywhere; it remembers its position. Red at 85 %.
 // Launched by scripts/setup.py with the plugin data dir; reads <data>/latest.json written by statusline.py.
 // Exits by itself when the plugin is updated or uninstalled (its own binary disappears).
 // Build: widget/build.sh
 import AppKit
 
-let datos = CommandLine.arguments.dropFirst().first { !$0.hasPrefix("-") } ?? NSHomeDirectory() + "/.claude/compact-autopilot"
+let datos = CommandLine.arguments.dropFirst().first { !$0.hasPrefix("-") } ?? NSHomeDirectory() + "/.claude/elephant-mode"
 let ruta = datos + "/latest.json"
 let binario = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath().path
 let es = Locale.preferredLanguages.first?.hasPrefix("es") ?? false
@@ -122,7 +122,7 @@ final class Vista: NSView {
         if l.ctx >= ALERTA { pie = t("⚠ SAVING MEMORY · COMPACTING SOON", "⚠ GUARDANDO MEMORIA · COMPACTA PRONTO"); col = .white }
         else if alerta { pie = t("⚠ USAGE LIMIT NEAR · MEMORY SAVED", "⚠ LÍMITE CERCA · MEMORIA GUARDADA"); col = .white }
         else if l.edad > 600 { pie = l.edad.isInfinite ? t("waiting for Claude Code…", "esperando a Claude Code…") : t("no data for \(Int(l.edad / 60)) min", "sin datos hace \(Int(l.edad / 60)) min"); col = .white.withAlphaComponent(0.45) }
-        else { pie = t("compact-autopilot · all good", "compact-autopilot · todo en orden"); col = .white.withAlphaComponent(0.45) }
+        else { pie = t("🐘 elephant mode · all good", "🐘 modo elefante · todo en orden"); col = .white.withAlphaComponent(0.45) }
         texto(pie, NSPoint(x: bounds.midX, y: 7), 10, col, bold: alerta)
     }
 }
@@ -139,7 +139,7 @@ final class App: NSObject, NSApplicationDelegate {
         win.collectionBehavior = [.canJoinAllSpaces, .stationary]
         win.isOpaque = false; win.backgroundColor = .clear; win.hasShadow = true
         win.isMovableByWindowBackground = true  // arrástralo a la esquina que quieras
-        win.setFrameAutosaveName("CompactAutopilotGauge")  // recuerda la posición
+        win.setFrameAutosaveName("ElephantModeGauge")  // recuerda la posición
         win.contentView = vista
         win.orderFrontRegardless()
         Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in self.tick() }

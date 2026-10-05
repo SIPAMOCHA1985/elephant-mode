@@ -8,4 +8,4 @@
 - Points Claude to its continuity notes after compaction.
 - Optional local transcript backups (off by default).
 - Floating transparent gauge for macOS (universal binary), English/Spanish.
-- `/compact-autopilot:uninstall` restores the settings it changed.
+- `/elephant-mode:uninstall` restores the settings it changed.

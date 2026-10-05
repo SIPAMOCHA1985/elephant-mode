@@ -9,7 +9,7 @@ You can expect a first reply within 7 days. Supported version: the latest releas
 `widget/bin/Gauge` is built from `widget/Gauge.swift` by GitHub Actions and carries a build-provenance attestation. Verify it with:
 
 ```
-gh attestation verify widget/bin/Gauge --repo SIPAMOCHA1985/compact-autopilot
+gh attestation verify widget/bin/Gauge --repo SIPAMOCHA1985/elephant-mode
 ```
 
 Or build it yourself on a Mac: `widget/build.sh`.
