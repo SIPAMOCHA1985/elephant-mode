@@ -2,15 +2,71 @@
   "name": "compact-autopilot",
   "version": "0.1.0",
   "description": "Saves memory and continuity notes before auto-compaction, compacts earlier, and shows a floating usage gauge. Local only, no network.",
-  "author": { "name": "John Sipamocha", "url": "https://github.com/SIPAMOCHA1985" },
+  "author": {
+    "name": "John Sipamocha",
+    "url": "https://github.com/SIPAMOCHA1985"
+  },
   "repository": "https://github.com/SIPAMOCHA1985/compact-autopilot",
   "license": "MIT",
-  "keywords": ["memory", "compaction", "context", "hooks", "usage"],
+  "keywords": [
+    "memory",
+    "compaction",
+    "context",
+    "hooks",
+    "usage"
+  ],
   "userConfig": {
-    "save_pct": { "type": "number", "title": "Save memory at (% context)", "description": "Context fullness at which Claude is told to save memory and continuity notes.", "default": 80, "min": 30, "max": 95 },
-    "limit_pct": { "type": "number", "title": "Save memory at (% usage limit)", "description": "5-hour or weekly usage-limit level at which Claude saves memory before a possible cut-off.", "default": 85, "min": 30, "max": 99 },
-    "context_window": { "type": "number", "title": "Context window (tokens)", "description": "Used only when the statusline snapshot is unavailable. Auto-corrects upward if usage exceeds it.", "default": 200000, "min": 100000, "max": 2000000 },
-    "backups": { "type": "boolean", "title": "Back up transcripts before compaction", "description": "Keep a local copy of the full conversation before each compaction. Off by default.", "default": false },
-    "backup_keep": { "type": "number", "title": "Backups to keep", "description": "Older backups are deleted.", "default": 10, "min": 1, "max": 200 }
+    "save_pct": {
+      "type": "number",
+      "title": "Save memory at (% context)",
+      "description": "Context fullness at which Claude is told to save memory and continuity notes.",
+      "default": 80,
+      "min": 30,
+      "max": 95
+    },
+    "limit_pct": {
+      "type": "number",
+      "title": "Save memory at (% usage limit)",
+      "description": "5-hour or weekly usage-limit level at which Claude saves memory before a possible cut-off.",
+      "default": 85,
+      "min": 30,
+      "max": 99
+    },
+    "context_window": {
+      "type": "number",
+      "title": "Context window (tokens)",
+      "description": "Used only when the statusline snapshot is unavailable. Auto-corrects upward if usage exceeds it.",
+      "default": 200000,
+      "min": 100000,
+      "max": 2000000
+    },
+    "backups": {
+      "type": "boolean",
+      "title": "Back up transcripts before compaction",
+      "description": "Keep a local copy of the full conversation before each compaction. Off by default.",
+      "default": false
+    },
+    "backup_keep": {
+      "type": "number",
+      "title": "Backups to keep",
+      "description": "Older backups are deleted.",
+      "default": 10,
+      "min": 1,
+      "max": 200
+    },
+    "compact_pct": {
+      "type": "number",
+      "title": "Auto-compact at (% context)",
+      "description": "Written once to CLAUDE_AUTOCOMPACT_PCT_OVERRIDE on first run, only if you haven't set it yourself.",
+      "default": 85,
+      "min": 50,
+      "max": 95
+    },
+    "quiet": {
+      "type": "boolean",
+      "title": "Quiet first run",
+      "description": "Don't mention the first-run settings changes in the conversation.",
+      "default": false
+    }
   }
 }

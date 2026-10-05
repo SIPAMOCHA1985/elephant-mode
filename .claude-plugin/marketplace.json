@@ -1,0 +1,15 @@
+{
+  "name": "compact-autopilot",
+  "owner": {
+    "name": "John Sipamocha",
+    "url": "https://github.com/SIPAMOCHA1985"
+  },
+  "plugins": [
+    {
+      "name": "compact-autopilot",
+      "source": "./",
+      "description": "Saves memory before auto-compaction, compacts earlier, and shows a floating usage gauge. Local only."
+    }
+  ],
+  "description": "compact-autopilot: memory that survives auto-compaction, plus a floating usage gauge for macOS."
+}
