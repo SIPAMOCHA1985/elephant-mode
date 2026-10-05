@@ -4,6 +4,8 @@
 
 **English** · [Español](README.es.md)
 
+> **Status: beta (v0.1).** It works and is tested, but it's new. Please [open an issue](https://github.com/SIPAMOCHA1985/elephant-mode/issues) if something misbehaves.
+
 Turn on Elephant Mode: a plugin for Claude Code that makes it **save its memory before it forgets**: when the conversation gets full, Claude writes down what matters, then compacts on its own. A small floating gauge shows how close you are to every limit.
 
 <p>
