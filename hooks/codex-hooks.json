@@ -1,0 +1,53 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${PLUGIN_ROOT}/scripts/py\" \"${PLUGIN_ROOT}/scripts/funnel.py\" Stop",
+            "commandWindows": "\"%PLUGIN_ROOT%\\scripts\\py.cmd\" \"%PLUGIN_ROOT%\\scripts\\funnel.py\" Stop",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${PLUGIN_ROOT}/scripts/py\" \"${PLUGIN_ROOT}/scripts/funnel.py\" PostToolUse",
+            "commandWindows": "\"%PLUGIN_ROOT%\\scripts\\py.cmd\" \"%PLUGIN_ROOT%\\scripts\\funnel.py\" PostToolUse",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${PLUGIN_ROOT}/scripts/py\" \"${PLUGIN_ROOT}/scripts/funnel.py\" PreCompact",
+            "commandWindows": "\"%PLUGIN_ROOT%\\scripts\\py.cmd\" \"%PLUGIN_ROOT%\\scripts\\funnel.py\" PreCompact",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${PLUGIN_ROOT}/scripts/py\" \"${PLUGIN_ROOT}/scripts/funnel.py\" compact",
+            "commandWindows": "\"%PLUGIN_ROOT%\\scripts\\py.cmd\" \"%PLUGIN_ROOT%\\scripts\\funnel.py\" compact",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

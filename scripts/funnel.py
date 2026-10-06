@@ -32,6 +32,8 @@ WINDOW = int(opt("context_window", 200_000))
 BACKUPS = str(opt("backups", "false")).lower() == "true"  # off by default: no conversation copies unless asked
 KEEP = int(opt("backup_keep", 10))
 BIG_WINDOW = 1_000_000
+CODEX = "PLUGIN_ROOT" in os.environ  # Codex sets PLUGIN_ROOT (and CLAUDE_PLUGIN_ROOT for compat); Claude Code only the latter
+LIMIT_LABELS = {300: "5-hour usage limit", 10080: "weekly usage limit"}  # Codex limit windows, in minutes
 
 # This exact text is what Claude receives. It is also quoted in the README: no hidden instructions.
 INSTRUCTION = """[elephant-mode] {reason}. Claude Code will auto-compact soon and the details of this conversation will be summarized away. Before continuing:
@@ -55,30 +57,57 @@ def write_json(path, data):
 
 
 def last_usage(transcript):
-    """Tokens in context at the last model call = the usage of the last assistant message."""
-    used = 0
+    """Tokens in context at the last model call, and on Codex the window size and usage limits too.
+    Claude Code: usage of the last assistant message. Codex: its last token_count event."""
+    used, window, limits = 0, None, None
     try:
         with open(transcript, "rb") as f:
             f.seek(max(0, os.path.getsize(transcript) - 512_000))  # the last message is always near the end
-            for line in f.read().decode(errors="ignore").splitlines():
+            for line in f.read().decode("utf-8", errors="ignore").splitlines():
                 try:
-                    u = json.loads(line).get("message", {}).get("usage")
+                    j = json.loads(line)
+                    u = j.get("message", {}).get("usage")
+                    tc = j.get("payload") or {}
+                    tc = tc if tc.get("type") == "token_count" else None
                 except (ValueError, AttributeError):
                     continue
                 if u:
                     used = sum(u.get(k) or 0 for k in ("input_tokens", "cache_creation_input_tokens",
                                                        "cache_read_input_tokens", "output_tokens"))
+                elif tc:
+                    # ponytail: Codex's own meter also subtracts a 12K fixed baseline; ignored, so we read ~1-3 % higher
+                    info = tc.get("info") or {}
+                    used = (info.get("last_token_usage") or {}).get("total_tokens") or used
+                    window = info.get("model_context_window") or window
+                    limits = tc.get("rate_limits") or limits
     except OSError:
         pass
-    return used
+    return used, window, limits
 
 
-def window_size(sid, used):
-    """Exact size from this session's statusline snapshot; else the configured size.
-    No hook input carries the window size, and the model id doesn't reveal it either."""
-    size = read_json(DATA / "sessions" / f"{sid}.json").get("context_window", {}).get("context_window_size")
+def window_size(sid, used, window=None):
+    """Codex logs the exact size; Claude Code's comes from this session's statusline snapshot;
+    else the configured size. Claude's hook input doesn't carry it, and the model id doesn't reveal it."""
+    size = window or read_json(DATA / "sessions" / f"{sid}.json").get("context_window", {}).get("context_window_size")
     size = size or WINDOW
     return BIG_WINDOW if used > size else size  # usage beyond the configured size proves a bigger window
+
+
+def usage_limits(codex_limits):
+    """(key, label, used %, resets_at) per limit. Codex logs them in the transcript;
+    Claude Code's come from the statusline snapshot."""
+    if codex_limits is not None:
+        return [(k, LIMIT_LABELS.get(w.get("window_minutes"), f"{w.get('window_minutes')}-minute usage limit"),
+                 w.get("used_percent"), w.get("resets_at"))
+                for k in ("primary", "secondary") if (w := codex_limits.get(k) or {})]
+    limits = read_json(DATA / "latest.json").get("rate_limits") or {}
+    return [(k, label, (limits.get(k) or {}).get("used_percentage"), (limits.get(k) or {}).get("resets_at"))
+            for k, label in (("five_hour", "5-hour usage limit"), ("seven_day", "weekly usage limit"))]
+
+
+def memory_path(transcript):
+    """Claude Code keeps memory next to the transcript. Codex's own memory is internal, so it gets a file here."""
+    return DATA / "memory.md" if CODEX else Path(transcript).parent / "memory"
 
 
 def check(h, event):
@@ -90,24 +119,22 @@ def check(h, event):
     flags = read_json(flag_file)
     reasons = []
 
-    used = last_usage(transcript)
-    pct = 100 * used / window_size(sid, used)
+    used, window, codex_limits = last_usage(transcript)
+    pct = 100 * used / window_size(sid, used, window)
     if pct >= SAVE_PCT and not flags.get("ctx"):
         flags["ctx"] = True
         reasons.append(f"Context is {pct:.0f}% full")
 
-    limits = read_json(DATA / "latest.json").get("rate_limits") or {}
-    for key, label in (("five_hour", "5-hour usage limit"), ("seven_day", "weekly usage limit")):
-        lim = limits.get(key) or {}
-        if (lim.get("used_percentage") or 0) >= LIMIT_PCT and flags.get(key) != lim.get("resets_at"):
-            flags[key] = lim.get("resets_at")  # once per limit window
-            reasons.append(f"{label} is at {lim['used_percentage']:.0f}% and the session may be cut off")
+    for key, label, used_pct, resets_at in usage_limits(codex_limits):
+        if (used_pct or 0) >= LIMIT_PCT and flags.get(key) != resets_at:
+            flags[key] = resets_at  # once per limit window
+            reasons.append(f"{label} is at {used_pct:.0f}% and the session may be cut off")
 
     if not reasons:
         return
     write_json(flag_file, flags)
     msg = INSTRUCTION.format(reason="; ".join(reasons),
-                             memory=Path(transcript).parent / "memory",
+                             memory=memory_path(transcript),
                              continuity=DATA / "continuity" / f"{sid}.md")
     (DATA / "continuity").mkdir(parents=True, exist_ok=True)
     if event == "Stop":
@@ -135,8 +162,9 @@ def precompact(h):
 def compact(h):
     notes = DATA / "continuity" / f"{h.get('session_id') or 'unknown'}.md"
     if notes.is_file():
+        memory = DATA / "memory.md" if CODEX else "your memory"
         print(f"[elephant-mode] The conversation was just compacted. Read {notes} "
-              "and your memory before continuing, then pick up where you left off.")
+              f"and {memory} before continuing, then pick up where you left off.")
 
 
 if __name__ == "__main__":

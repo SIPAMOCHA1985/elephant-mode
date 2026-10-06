@@ -51,6 +51,17 @@ Reinicia Claude Code y listo. En la primera sesión, el plugin:
 - En Linux funcionan el guardado de memoria y la línea de estado; por ahora la pantalla es solo para Mac.
 - En Windows funcionan el guardado de memoria y la statusline (el medidor es solo Mac por ahora). Instala Python desde [python.org](https://www.python.org/downloads/); el alias `python3` de la Microsoft Store se ignora solo. Claude Code ya exige Git for Windows, que trae la shell donde corren los hooks.
 
+### Codex (beta)
+
+El mismo guardado de memoria funciona en Codex CLI de OpenAI (0.160+), en macOS, Linux y Windows:
+
+```
+codex plugin marketplace add SIPAMOCHA1985/elephant-mode
+codex plugin add elephant-mode@elephant-mode
+```
+
+Reinicia Codex, ejecuta `/hooks` y aprueba los cuatro hooks de elephant-mode (Codex no los corre hasta que los revisas). El % de contexto, el tamaño de la ventana y los límites de 5 horas y semanal se leen del propio registro de sesión de Codex, así que los guardados al 80 % y 85 % funcionan igual que en Claude Code. Diferencias: la memoria va a un archivo `memory.md` en la carpeta de datos del plugin (la memoria interna de Codex no se toca), no hay statusline ni medidor, y el plugin no cambia el umbral de autocompactado de Codex (`model_auto_compact_token_limit` en `config.toml` lo decides tú).
+
 ## Cómo funciona
 
 Usa solo funciones oficiales de Claude Code: hooks, línea de estado y auto-compact. No llama a ninguna API ni evade los límites de uso: solo los muestra y te ayuda a no perder trabajo.

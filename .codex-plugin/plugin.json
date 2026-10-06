@@ -1,0 +1,12 @@
+{
+  "name": "elephant-mode",
+  "version": "0.2.0",
+  "description": "Elephants never forget: saves Codex's memory and continuity notes before it auto-compacts. Local only, no network.",
+  "author": {
+    "name": "John Sipamocha",
+    "url": "https://github.com/SIPAMOCHA1985"
+  },
+  "repository": "https://github.com/SIPAMOCHA1985/elephant-mode",
+  "license": "MIT",
+  "hooks": "./hooks/codex-hooks.json"
+}

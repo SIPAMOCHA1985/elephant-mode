@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0 — 2026-10-05
+
+- Codex CLI support (beta, 0.160+): `.codex-plugin/plugin.json`, `hooks/codex-hooks.json` and a Codex marketplace in `.agents/plugins/`. The same funnel reads context, window size and 5-hour/weekly limits from Codex's session log (`token_count` events). Memory goes to `memory.md` in the plugin data folder. Codex hooks never run `setup.py`, which edits Claude Code's settings.
+- `scripts/py.cmd`: Windows launcher for Codex, which runs hooks through cmd.exe.
+
 ## 0.1.1 — 2026-10-05
 
 - Windows support for the memory save and statusline: a small launcher (`scripts/py`) finds a working Python 3.9+ (`python3`, `python` or `py -3`) instead of hitting the Microsoft Store `python3` stub.

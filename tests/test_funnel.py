@@ -11,10 +11,12 @@ ROOT = Path(__file__).resolve().parent.parent
 FUNNEL = ROOT / "scripts" / "funnel.py"
 
 
-def run(mode, hook, data, **opts):
-    env = {**os.environ, "CLAUDE_PLUGIN_DATA": str(data),
+def run(mode, hook, data, env=None, **opts):
+    env = {**os.environ, "CLAUDE_PLUGIN_DATA": str(data), **(env or {}),
            **{f"CLAUDE_PLUGIN_OPTION_{k.upper()}": str(v) for k, v in opts.items()}}
-    out = subprocess.run([sys.executable, str(FUNNEL), mode], input=json.dumps(hook),
+    # on Windows, go through the launcher Codex uses there (cmd.exe + py.cmd)
+    cmd = [str(ROOT / "scripts" / "py.cmd")] if os.name == "nt" else [sys.executable]
+    out = subprocess.run(cmd + [str(FUNNEL), mode], input=json.dumps(hook),
                          capture_output=True, text=True, encoding="utf-8", env=env, check=True).stdout
     return json.loads(out) if out.strip().startswith("{") else out
 
@@ -65,6 +67,27 @@ with tempfile.TemporaryDirectory() as tmp:
     (data / "continuity" / "s1.md").write_text("notes")
     assert "s1.md" in run("compact", hook(high), data), "points Claude at its notes after compaction"
     assert run("compact", hook(high, "none"), data) == "", "silent when there are no notes"
+
+    # Codex: tokens, window and usage limits all come from the transcript's token_count events
+    def codex_transcript(name, tokens, window, limits=None):
+        p = Path(tmp) / name
+        p.write_text("\n".join(json.dumps(x) for x in (
+            {"type": "session_meta", "payload": {"id": name}},
+            {"type": "event_msg", "payload": {"type": "token_count", "info": None, "rate_limits": None}},
+            {"type": "event_msg", "payload": {"type": "token_count", "rate_limits": limits, "info": {
+                "last_token_usage": {"input_tokens": tokens, "cached_input_tokens": tokens // 2, "output_tokens": 0,
+                                     "total_tokens": tokens}, "model_context_window": window}}})) + "\n")
+        return str(p)
+    codex = {"PLUGIN_ROOT": str(ROOT)}
+    low_lim = {"primary": {"used_percent": 10.0, "window_minutes": 300, "resets_at": 1}}
+    assert run("Stop", hook(codex_transcript("c1", 300_000, 1_000_000, low_lim), "c1"), data, env=codex) == "", "30 % of Codex's window"
+    out = run("Stop", hook(codex_transcript("c2", 350_000, 400_000), "c2"), data, env=codex)
+    assert "Context is 88% full" in out["reason"] and str(data / "memory.md") in out["reason"], "Codex: own window, own memory file"
+    lim = {"primary": {"used_percent": 91.0, "window_minutes": 300, "resets_at": 1},
+           "secondary": {"used_percent": 20.0, "window_minutes": 10080, "resets_at": 2}}
+    out = run("Stop", hook(codex_transcript("c3", 1000, 400_000, lim), "c3"), data, env=codex)
+    assert "5-hour usage limit is at 91%" in out["reason"] and "weekly" not in out["reason"], out
+    assert run("Stop", hook(codex_transcript("c3", 1000, 400_000, lim), "c3"), data, env=codex) == "", "once per window"
 
     # statusline: snapshots + short line
     sl = Path(tmp) / "sl"

@@ -47,6 +47,17 @@ Restart Claude Code. That's it. On the first session the plugin:
 
 **Requirements:** Claude Code and Python 3.9+. On macOS, Python comes with the Xcode Command Line Tools, which `git` (and therefore plugin installs) already needs. The gauge is a prebuilt universal binary (Apple Silicon and Intel, macOS 13+): nothing to compile, no extra hardware. On Linux and Windows the memory save and statusline work; the gauge is macOS-only for now. On Windows, install Python from [python.org](https://www.python.org/downloads/) (the Microsoft Store `python3` alias is skipped automatically); Claude Code already requires Git for Windows, which provides the shell the hooks run in.
 
+### Codex (beta)
+
+The same memory save runs in OpenAI's Codex CLI (0.160+), on macOS, Linux and Windows:
+
+```
+codex plugin marketplace add SIPAMOCHA1985/elephant-mode
+codex plugin add elephant-mode@elephant-mode
+```
+
+Restart Codex, run `/hooks` and trust the four elephant-mode hooks (Codex skips hooks until you review them). Context %, window size and the 5-hour/weekly limits are read from Codex's own session log, so the 80 % and 85 % saves work as in Claude Code. Differences: memory goes to a `memory.md` file in the plugin's data folder (Codex's built-in memory is left alone), there is no statusline or gauge, and the plugin doesn't move Codex's auto-compact threshold (`model_auto_compact_token_limit` in `config.toml` is yours to set).
+
 ## How it works
 
 ```

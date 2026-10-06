@@ -1,7 +1,7 @@
 {
   "name": "elephant-mode",
   "displayName": "Elephant Mode",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Elephants never forget: saves Claude Code's memory before it auto-compacts, compacts earlier, and shows a floating usage gauge. Local only, no network.",
   "author": {
     "name": "John Sipamocha",
