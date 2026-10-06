@@ -14,7 +14,7 @@ elephant-mode runs entirely on your computer. **It makes no network requests and
 | `latest.json`, `sessions/<id>.json` | The statusline data above (numbers, model name, working directory) | Overwritten on every refresh |
 | `flags/<id>.json` | Which thresholds already fired | Small; removed on uninstall |
 | `continuity/<id>.md` | Notes **Claude** writes about the current task | Until you delete them or uninstall |
-| `log.jsonl` | One line per save request and per compaction: time, session id, reason, whether the notes were written. No message text | Until you delete it or uninstall |
+| `log.jsonl` | One line per save request and per compaction: time, session id, reason, whether the notes and the memory were written. No message text | Until you delete it or uninstall |
 | `memory.md` | Codex only: the notes Codex saves (Codex's own memory is left alone) | Until you delete it or uninstall |
 | `settings.backup.json` | Your `settings.json` before the first-run changes | Until uninstall |
 | `backups/*.jsonl` | Full conversation copies — **only if you turn `backups` on** | The newest `backup_keep` (default 10) |

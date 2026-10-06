@@ -161,8 +161,12 @@ def precompact(h):
     asked = flags.pop("requested_at", None)
     write_json(flag_file, flags)
     notes = DATA / "continuity" / f"{sid}.md"
+    mem = memory_path(h.get("transcript_path") or "")
+    # memory_updated can be false with a well-behaved model too: there may have been nothing new worth keeping
     log(sid, event="compact", trigger=h.get("trigger"), save_requested=asked is not None,
-        notes_written=bool(asked) and notes.is_file() and notes.stat().st_mtime >= asked)
+        notes_written=bool(asked) and notes.is_file() and notes.stat().st_mtime >= asked,
+        memory_updated=bool(asked) and any(f.stat().st_mtime >= asked
+                                           for f in ([mem] if mem.is_file() else mem.glob("*.md"))))
 
     src = Path(h.get("transcript_path") or "")
     if BACKUPS and src.is_file():

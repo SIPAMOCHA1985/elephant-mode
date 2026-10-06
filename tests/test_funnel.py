@@ -71,7 +71,13 @@ with tempfile.TemporaryDirectory() as tmp:
     run("Stop", hook(high, "obey"), data)
     (data / "continuity" / "obey.md").write_text("notes")
     run("PreCompact", hook(high, "obey"), data)
-    assert log()[-1]["notes_written"] and log()[-2]["event"] == "save_requested", log()[-2:]
+    assert log()[-1]["notes_written"] and not log()[-1]["memory_updated"], log()[-1]
+    assert log()[-2]["event"] == "save_requested", log()[-2:]
+    run("Stop", hook(high, "obey"), data)
+    (Path(high).parent / "memory").mkdir(exist_ok=True)
+    (Path(high).parent / "memory" / "rule.md").write_text("a rule")
+    run("PreCompact", hook(high, "obey"), data)
+    assert log()[-1]["memory_updated"], "memory written after the request: logged"
 
     (data / "continuity").mkdir(exist_ok=True)
     (data / "continuity" / "s1.md").write_text("notes")

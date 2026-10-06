@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 — 2026-10-05
+
+- `log.jsonl` also records `memory_updated`: whether any memory file changed after the save request (it can be false when there was nothing new worth keeping).
+
 ## 0.2.0 — 2026-10-05
 
 - Codex CLI support (beta, 0.160+): `.codex-plugin/plugin.json`, `hooks/codex-hooks.json` and a Codex marketplace in `.agents/plugins/`. The same funnel reads context, window size and 5-hour/weekly limits from Codex's session log (`token_count` events). Memory goes to `memory.md` in the plugin data folder. Codex hooks never run `setup.py`, which edits Claude Code's settings.

@@ -108,7 +108,7 @@ El primer comando quita solo lo que agregó el plugin (su línea de estado y el 
 
 **¿En qué se diferencia de claude-mem?** [claude-mem](https://github.com/thedotmack/claude-mem) es un sistema completo de memoria: graba todo y lo comprime con IA. elephant-mode es lo contrario: unos pocos scripts, sin dependencias ni base de datos, y usa la memoria propia de Claude Code. Hace una sola cosa: guardar memoria *antes* de compactar, en el % que tú elijas. Se pueden usar juntos.
 
-**¿El guardado está garantizado?** No. El plugin le *pide* a Claude que escriba su memoria y sus notas, y casi siempre lo hace, pero un hook no puede escribirlas por él (solo el modelo sabe qué importa). Si el turno se corta antes, no se guarda nada. `log.jsonl`, en la carpeta de datos del plugin, registra cada petición y, en el siguiente compactado, si las notas se escribieron de verdad.
+**¿El guardado está garantizado?** No. El plugin le *pide* a Claude que escriba su memoria y sus notas, y casi siempre lo hace, pero un hook no puede escribirlas por él (solo el modelo sabe qué importa). Si el turno se corta antes, no se guarda nada. `log.jsonl`, en la carpeta de datos del plugin, registra cada petición y, en el siguiente compactado, si las notas y la memoria se escribieron de verdad.
 
 **¿Gasta tokens extra?** Un paso extra por cada ciclo, mientras Claude escribe sus notas. A cambio, como compacta antes, los mensajes que siguen pesan menos.
 
