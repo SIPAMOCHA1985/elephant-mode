@@ -42,7 +42,7 @@ INSTRUCTION = """[elephant-mode] {reason}. Claude Code will auto-compact soon an
 
 def read_json(path, default=None):
     try:
-        return json.loads(Path(path).read_text())
+        return json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return default if default is not None else {}
 
@@ -50,7 +50,7 @@ def read_json(path, default=None):
 def write_json(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(data))
+    tmp.write_text(json.dumps(data), encoding="utf-8")
     os.replace(tmp, path)  # atomic: a crash never leaves half a file
 
 
@@ -140,8 +140,9 @@ def compact(h):
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")  # Windows defaults to cp1252
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
-    hook = json.loads(sys.stdin.read() or "{}")
+    hook = json.loads(sys.stdin.buffer.read() or b"{}")
     if mode in ("Stop", "PostToolUse"):
         check(hook, mode)
     elif mode == "PreCompact":

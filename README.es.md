@@ -49,7 +49,7 @@ Reinicia Claude Code y listo. En la primera sesión, el plugin:
 - En macOS, Python viene con las Command Line Tools de Xcode, que `git` ya necesita para instalar plugins.
 - La pantalla viene ya compilada para Apple Silicon e Intel (macOS 13+). No hay que compilar nada ni comprar hardware.
 - En Linux funcionan el guardado de memoria y la línea de estado; por ahora la pantalla es solo para Mac.
-- En Windows no está probado.
+- En Windows funcionan el guardado de memoria y la statusline (el medidor es solo Mac por ahora). Instala Python desde [python.org](https://www.python.org/downloads/); el alias `python3` de la Microsoft Store se ignora solo. Claude Code ya exige Git for Windows, que trae la shell donde corren los hooks.
 
 ## Cómo funciona
 

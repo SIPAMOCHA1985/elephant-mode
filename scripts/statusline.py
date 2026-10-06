@@ -13,11 +13,12 @@ ALERT = 85
 def save(path, raw):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(raw)
+    tmp.write_text(raw, encoding="utf-8")
     os.replace(tmp, path)
 
 
-raw = sys.stdin.read()
+sys.stdout.reconfigure(encoding="utf-8")  # Windows defaults to cp1252
+raw = sys.stdin.buffer.read().decode("utf-8", "replace")
 try:
     j = json.loads(raw)
 except ValueError:

@@ -18,7 +18,7 @@ with tempfile.TemporaryDirectory() as tmp:
     cfg.mkdir()
     env = {**os.environ, "CLAUDE_CONFIG_DIR": str(cfg), "CLAUDE_PLUGIN_DATA": str(data)}
     run = lambda mode, **o: subprocess.run(
-        [sys.executable, str(plugin / "scripts" / "setup.py"), mode], capture_output=True, text=True, check=True,
+        [sys.executable, str(plugin / "scripts" / "setup.py"), mode], capture_output=True, text=True, encoding="utf-8", check=True,
         env={**env, **{f"CLAUDE_PLUGIN_OPTION_{k.upper()}": str(v) for k, v in o.items()}}).stdout
     settings = lambda: json.loads((cfg / "settings.json").read_text())
 
@@ -29,7 +29,8 @@ with tempfile.TemporaryDirectory() as tmp:
     s = settings()
     assert s["model"] == "opus" and s["env"]["FOO"] == "1", "keeps the user's own settings"
     assert s["env"]["CLAUDE_AUTOCOMPACT_PCT_OVERRIDE"] == "85"
-    assert str(data / "statusline.py") in s["statusLine"]["command"] and (data / "statusline.py").is_file()
+    assert (data / "statusline.py").as_posix() in s["statusLine"]["command"] and (data / "statusline.py").is_file()
+    assert (data / "py").is_file(), "the launcher is copied next to the statusline"
     assert json.loads((data / "settings.backup.json").read_text()) == original, "backup before changing"
     assert "First run" in out and "uninstall" in out, "tells the user once"
     assert run("ensure") == "", "second session: silent, no changes"

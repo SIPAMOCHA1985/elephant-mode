@@ -1,0 +1,11 @@
+#!/bin/sh
+# Runs a plugin script with the first working Python 3.9+, on macOS, Linux and Windows (Git Bash).
+# On Windows `python3` is often the Microsoft Store stub, so each name is tried until one really runs.
+# ponytail: probing costs one extra interpreter start per hook (~20 ms); cache the choice if that ever matters.
+for py in python3 python "py -3"; do
+  if $py -c "import sys; sys.exit(sys.version_info < (3, 9))" >/dev/null 2>&1; then
+    exec $py "$@"
+  fi
+done
+echo "elephant-mode: Python 3.9+ not found. Install it from python.org and reopen Claude Code." >&2
+exit 1

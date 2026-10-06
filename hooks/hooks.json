@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py\" Stop"
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/py\" \"${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py\" Stop"
           }
         ]
       }
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py\" PostToolUse"
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/py\" \"${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py\" PostToolUse"
           }
         ]
       }
@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py\" PreCompact"
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/py\" \"${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py\" PreCompact"
           }
         ]
       }
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/setup.py\" ensure"
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/py\" \"${CLAUDE_PLUGIN_ROOT}/scripts/setup.py\" ensure"
           }
         ]
       },
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py\" compact"
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/py\" \"${CLAUDE_PLUGIN_ROOT}/scripts/funnel.py\" compact"
           }
         ]
       }

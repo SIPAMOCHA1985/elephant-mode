@@ -31,7 +31,7 @@ def opt(key, default):
 
 def load(path):
     try:
-        return json.loads(Path(path).read_text())
+        return json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}
 
@@ -39,17 +39,21 @@ def load(path):
 def dump(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(data, indent=2) + "\n")
+    tmp.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, path)
 
 
 def statusline_cmd():
-    return f'python3 "{DATA / "statusline.py"}"'
+    return f'sh "{(DATA / "py").as_posix()}" "{(DATA / "statusline.py").as_posix()}"'
+
+
+LEGACY_CMD = f'python3 "{DATA / "statusline.py"}"'  # written by 0.1.0; remove() still recognizes it
 
 
 def ensure():
     DATA.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(ROOT / "scripts" / "statusline.py", DATA / "statusline.py")  # stable path across plugin updates
+    for name in ("statusline.py", "py"):  # stable paths across plugin updates
+        shutil.copy2(ROOT / "scripts" / name, DATA / name)
     state = load(STATE)
     notes = []
     if not state.get("configured"):
@@ -81,8 +85,10 @@ def ensure():
 
 
 def gauge_pid():
+    if os.name == "nt":  # on Windows os.kill(pid, 0) terminates the process instead of probing it
+        return None
     try:
-        pid = int((DATA / "gauge.pid").read_text())
+        pid = int((DATA / "gauge.pid").read_text(encoding="utf-8"))
         os.kill(pid, 0)
         return pid
     except (OSError, ValueError):
@@ -101,7 +107,7 @@ def open_gauge():
 def remove():
     state = load(STATE)
     s = load(SETTINGS)
-    if state.get("statusLine") and (s.get("statusLine") or {}).get("command") == statusline_cmd():
+    if state.get("statusLine") and (s.get("statusLine") or {}).get("command") in (statusline_cmd(), LEGACY_CMD):
         del s["statusLine"]
     if state.get("env") and ENV_KEY in s.get("env", {}):
         del s["env"][ENV_KEY]
@@ -117,4 +123,5 @@ def remove():
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")  # Windows defaults to cp1252
     {"ensure": ensure, "remove": remove}[sys.argv[1] if len(sys.argv) > 1 else "ensure"]()

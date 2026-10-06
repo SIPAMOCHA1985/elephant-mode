@@ -15,7 +15,7 @@ def run(mode, hook, data, **opts):
     env = {**os.environ, "CLAUDE_PLUGIN_DATA": str(data),
            **{f"CLAUDE_PLUGIN_OPTION_{k.upper()}": str(v) for k, v in opts.items()}}
     out = subprocess.run([sys.executable, str(FUNNEL), mode], input=json.dumps(hook),
-                         capture_output=True, text=True, env=env, check=True).stdout
+                         capture_output=True, text=True, encoding="utf-8", env=env, check=True).stdout
     return json.loads(out) if out.strip().startswith("{") else out
 
 
@@ -70,10 +70,18 @@ with tempfile.TemporaryDirectory() as tmp:
     sl = Path(tmp) / "sl"
     sl.mkdir()
     (sl / "statusline.py").write_text((ROOT / "scripts" / "statusline.py").read_text())
-    line = subprocess.run([sys.executable, str(sl / "statusline.py")], capture_output=True, text=True, check=True,
+    line = subprocess.run([sys.executable, str(sl / "statusline.py")], capture_output=True, text=True, encoding="utf-8", check=True,
                           input=json.dumps({"session_id": "x", "context_window": {"used_percentage": 90},
                                             "rate_limits": {"five_hour": {"used_percentage": 12}}})).stdout
     assert "ctx 90%" in line and "5h 12%" in line and "\033[31m" in line, line
     assert (sl / "latest.json").is_file() and (sl / "sessions" / "x.json").is_file()
+
+    # Windows: a cp1252 console plus non-ASCII input (accented user folder), run through the launcher
+    line = subprocess.run(["sh", str(ROOT / "scripts" / "py"), str(sl / "statusline.py")], capture_output=True,
+                          env={**os.environ, "PYTHONIOENCODING": "cp1252"}, check=True,
+                          input=json.dumps({"cwd": "C:/Users/José\u0081", "context_window": {"used_percentage": 90}},
+                                           ensure_ascii=False).encode("utf-8")).stdout.decode("utf-8")
+    assert "ctx 90%" in line and "\u26a0" in line, line
+    assert "José" in (sl / "latest.json").read_text(encoding="utf-8")
 
 print("ok: all funnel and statusline checks passed")

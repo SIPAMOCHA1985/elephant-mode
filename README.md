@@ -45,7 +45,7 @@ Restart Claude Code. That's it. On the first session the plugin:
 - sets `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=85` **only if you haven't set it yourself**;
 - backs up your `settings.json` first, and tells you once what it changed.
 
-**Requirements:** Claude Code and Python 3.9+. On macOS, Python comes with the Xcode Command Line Tools, which `git` (and therefore plugin installs) already needs. The gauge is a prebuilt universal binary (Apple Silicon and Intel, macOS 13+): nothing to compile, no extra hardware. On Linux the memory save and statusline work; the gauge is macOS-only for now. Windows is untested.
+**Requirements:** Claude Code and Python 3.9+. On macOS, Python comes with the Xcode Command Line Tools, which `git` (and therefore plugin installs) already needs. The gauge is a prebuilt universal binary (Apple Silicon and Intel, macOS 13+): nothing to compile, no extra hardware. On Linux and Windows the memory save and statusline work; the gauge is macOS-only for now. On Windows, install Python from [python.org](https://www.python.org/downloads/) (the Microsoft Store `python3` alias is skipped automatically); Claude Code already requires Git for Windows, which provides the shell the hooks run in.
 
 ## How it works
 
