@@ -58,7 +58,10 @@ codex plugin add elephant-mode@elephant-mode
 
 Restart Codex, run `/hooks` and trust the four elephant-mode hooks (Codex skips hooks until you review them). Context %, window size and the 5-hour/weekly limits are read from Codex's own session log, so the 80 % and 85 % saves work as in Claude Code. Differences: memory goes to a `memory.md` file in the plugin's data folder (Codex's built-in memory is left alone), there is no statusline or gauge, and the plugin doesn't move Codex's auto-compact threshold (`model_auto_compact_token_limit` in `config.toml` is yours to set).
 
-## How it works
+### Grok CLI (beta)
+
+Install it from this repo with Grok's plugin installer, then start a new Grok session. On the first session the plugin adds its statusline to `~/.grok/config.toml` (only if you don't have one; the previous file is backed up) and never touches `~/.claude`. The context % comes from that statusline, so the 80 % save works; Grok reports no 5-hour or weekly limits, so those saves don't apply. After compacting, Grok's `PostCompact` hook points the model back to its notes. Memory goes to `memory.md` in the plugin data folder. Grok already auto-compacts at 85 % by default, so that setting is left alone.
+
 
 ```
  every tool call / end of turn                 compaction                        after

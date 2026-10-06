@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 — 2026-10-05
+
+- Grok CLI support (beta), from a review on Grok CLI 1.0.46: host detected by `GROK_PLUGIN_ROOT`/`GROK_HOOK_EVENT`; camelCase hook input (`sessionId`, `stopHookActive`); the observe-only `Stop` at session close is ignored; context % read from Grok's statusline snapshot (its hooks carry no transcript); no 5-hour/weekly saves (Grok sends no limits); continuity re-injected on `PostCompact`; memory in `memory.md`.
+- On Grok, setup writes the statusline to `~/.grok/config.toml` (only if none is set, with a backup) and never creates `~/.claude/settings.json`; uninstall removes exactly that block.
+- Claude Code and Codex behave as before.
+
 ## 0.2.1 — 2026-10-05
 
 - `log.jsonl` also records `memory_updated`: whether any memory file changed after the save request (it can be false when there was nothing new worth keeping).

@@ -105,6 +105,27 @@ with tempfile.TemporaryDirectory() as tmp:
     assert "5-hour usage limit is at 91%" in out["reason"] and "weekly" not in out["reason"], out
     assert run("Stop", hook(codex_transcript("c3", 1000, 400_000, lim), "c3"), data, env=codex) == "", "once per window"
 
+    # Grok: camelCase hook input, no transcript; the fill level comes from its statusline snapshot, no usage limits
+    gdata = Path(tmp) / "grok"
+    (gdata / "sessions").mkdir(parents=True)
+    (gdata / "sessions" / "grok-1.json").write_text(json.dumps({"context_window": {"used_percentage": 82}}))
+    (gdata / "latest.json").write_text(json.dumps({"context_window": {"used_percentage": 82},
+                                                   "rate_limits": {"five_hour": {"used_percentage": 99, "resets_at": 1}}}))
+    grok = {"GROK_PLUGIN_ROOT": str(ROOT), "GROK_HOOK_EVENT": "stop"}
+    g = lambda **o: {"hookEventName": "stop", "sessionId": "grok-1", "cwd": "/tmp/proyecto",
+                     "reason": "end_turn", "stopHookActive": False, **o}
+    assert run("Stop", g(stopHookActive=True), gdata, env=grok) == "", "respects stopHookActive"
+    assert run("Stop", g(reason="session_end"), gdata, env=grok) == "", "ignores the observe-only Stop at close"
+    out = run("Stop", g(), gdata, env=grok)
+    assert "Context is 82% full" in out["reason"] and "5-hour" not in out["reason"], out
+    assert str(gdata / "memory.md") in out["reason"] and (gdata / "flags" / "grok-1.json").is_file(), "uses sessionId"
+    assert run("Stop", g(), gdata, env=grok) == "", "once per compaction"
+    (gdata / "continuity" / "grok-1.md").write_text("notes")
+    assert run("compact", g(), gdata, env=grok) == "", "Grok never sends SessionStart:compact"
+    out = run("PostCompact", g(hookEventName="postCompact"), gdata, env=grok)
+    assert "grok-1.md" in out["hookSpecificOutput"]["additionalContext"], out
+    assert run("PostCompact", hook(high), data) == "", "Claude Code re-injects at SessionStart:compact, not here"
+
     # statusline: snapshots + short line
     sl = Path(tmp) / "sl"
     sl.mkdir()

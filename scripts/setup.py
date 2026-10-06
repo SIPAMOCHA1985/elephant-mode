@@ -22,6 +22,9 @@ DATA = Path(os.environ.get("CLAUDE_PLUGIN_DATA") or Path.home() / ".claude" / "e
 SETTINGS = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "settings.json"
 STATE = DATA / "setup.json"  # what we changed, so remove() undoes only that
 ENV_KEY = "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE"
+GROK = "GROK_PLUGIN_ROOT" in os.environ or "GROK_HOOK_EVENT" in os.environ  # same test as funnel.py
+GROK_CONFIG = Path.home() / ".grok" / "config.toml"
+BEGIN, END = "# >>> elephant-mode statusline", "# <<< elephant-mode"
 
 
 def opt(key, default):
@@ -62,10 +65,34 @@ def statusline_cmd():
 LEGACY_CMD = f'python3 "{DATA / "statusline.py"}"'  # written by 0.1.0; remove() still recognizes it
 
 
+def grok_ensure():
+    """Grok reads its statusline from ~/.grok/config.toml, never from ~/.claude. Add ours only if the user has none.
+    Early auto-compact isn't touched: Grok's session.auto_compact_threshold_percent already defaults to 85."""
+    text = GROK_CONFIG.read_text(encoding="utf-8") if GROK_CONFIG.exists() else ""
+    if "status_line" in text:  # theirs, or ours from an earlier session
+        return
+    if text and not (DATA / "config.backup.toml").exists():
+        shutil.copy2(GROK_CONFIG, DATA / "config.backup.toml")
+    cmd = json.dumps(statusline_cmd())  # a JSON string is a valid TOML basic string
+    GROK_CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    tmp = GROK_CONFIG.with_suffix(".tmp")
+    tmp.write_text(text + ("\n" if text and not text.endswith("\n") else "") +
+                   f'{BEGIN}\n[ui.status_line]\ntype = "command"\ncommand = {cmd}\n{END}\n', encoding="utf-8")
+    os.replace(tmp, GROK_CONFIG)
+
+
+def grok_remove():
+    if GROK_CONFIG.exists() and BEGIN in (text := GROK_CONFIG.read_text(encoding="utf-8")):
+        head, rest = text.split(BEGIN, 1)
+        GROK_CONFIG.write_text(head + rest.split(END + "\n", 1)[-1], encoding="utf-8")
+
+
 def ensure():
     DATA.mkdir(parents=True, exist_ok=True)
     for name in ("statusline.py", "py"):  # stable paths across plugin updates
         shutil.copy2(ROOT / "scripts" / name, DATA / name)
+    if GROK:  # Grok ignores SessionStart output, so nothing is printed either
+        return grok_ensure()
     state = load(STATE)
     notes = []
     s = None if state.get("configured") else load_settings()
@@ -121,6 +148,10 @@ def open_gauge():
 
 
 def remove():
+    grok_remove()  # always: the uninstall skill may run without Grok's hook variables
+    if GROK:
+        print("elephant-mode: Grok statusline removed. Now uninstall the plugin.")
+        return
     state = load(STATE)
     s = load_settings()
     if s is None:

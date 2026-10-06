@@ -32,7 +32,10 @@ WINDOW = int(opt("context_window", 200_000))
 BACKUPS = str(opt("backups", "false")).lower() == "true"  # off by default: no conversation copies unless asked
 KEEP = int(opt("backup_keep", 10))
 BIG_WINDOW = 1_000_000
-CODEX = "PLUGIN_ROOT" in os.environ  # Codex sets PLUGIN_ROOT (and CLAUDE_PLUGIN_ROOT for compat); Claude Code only the latter
+# Host CLI. All three set CLAUDE_PLUGIN_ROOT; Grok also sets GROK_*, Codex also sets PLUGIN_ROOT.
+GROK = "GROK_PLUGIN_ROOT" in os.environ or "GROK_HOOK_EVENT" in os.environ
+CODEX = "PLUGIN_ROOT" in os.environ and not GROK
+OWN_MEMORY = CODEX or GROK  # their built-in memory is left alone: notes go to memory.md in the plugin data folder
 LIMIT_LABELS = {300: "5-hour usage limit", 10080: "weekly usage limit"}  # Codex limit windows, in minutes
 
 # This exact text is what Claude receives. It is also quoted in the README: no hidden instructions.
@@ -107,7 +110,7 @@ def usage_limits(codex_limits):
 
 def memory_path(transcript):
     """Claude Code keeps memory next to the transcript. Codex's own memory is internal, so it gets a file here."""
-    return DATA / "memory.md" if CODEX else Path(transcript).parent / "memory"
+    return DATA / "memory.md" if OWN_MEMORY else Path(transcript).parent / "memory"
 
 
 def log(sid, **event):
@@ -127,13 +130,17 @@ def check(h, event):
     flags = read_json(flag_file)
     reasons = []
 
-    used, window, codex_limits = last_usage(transcript)
-    pct = 100 * used / window_size(sid, used, window)
+    if GROK:  # Grok's hooks carry no transcript; its statusline snapshot has the fill level
+        snap = read_json(DATA / "sessions" / f"{sid}.json") or read_json(DATA / "latest.json")
+        pct, codex_limits = (snap.get("context_window") or {}).get("used_percentage") or 0, None
+    else:
+        used, window, codex_limits = last_usage(transcript)
+        pct = 100 * used / window_size(sid, used, window)
     if pct >= SAVE_PCT and not flags.get("ctx"):
         flags["ctx"] = True
         reasons.append(f"Context is {pct:.0f}% full")
 
-    for key, label, used_pct, resets_at in usage_limits(codex_limits):
+    for key, label, used_pct, resets_at in ([] if GROK else usage_limits(codex_limits)):  # Grok reports no limits
         if (used_pct or 0) >= LIMIT_PCT and flags.get(key) != resets_at:
             flags[key] = resets_at  # once per limit window
             reasons.append(f"{label} is at {used_pct:.0f}% and the session may be cut off")
@@ -180,20 +187,27 @@ def precompact(h):
 def compact(h):
     notes = DATA / "continuity" / f"{h.get('session_id') or 'unknown'}.md"
     if notes.is_file():
-        memory = DATA / "memory.md" if CODEX else "your memory"
-        print(f"[elephant-mode] The conversation was just compacted. Read {notes} "
-              f"and {memory} before continuing, then pick up where you left off.")
+        memory = DATA / "memory.md" if OWN_MEMORY else "your memory"
+        msg = (f"[elephant-mode] The conversation was just compacted. Read {notes} "
+               f"and {memory} before continuing, then pick up where you left off.")
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostCompact", "additionalContext": msg}})
+              if GROK else msg)
 
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")  # Windows defaults to cp1252
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     hook = json.loads(sys.stdin.buffer.read() or b"{}")
-    if mode in ("Stop", "PostToolUse"):
+    for snake, camel in (("session_id", "sessionId"), ("stop_hook_active", "stopHookActive"),
+                         ("transcript_path", "transcriptPath")):
+        hook.setdefault(snake, hook.get(camel))  # Grok sends camelCase
+    if mode == "Stop" and hook.get("reason") not in (None, "end_turn"):
+        pass  # Grok's observe-only Stop at session close: blocking there does nothing
+    elif mode in ("Stop", "PostToolUse"):
         check(hook, mode)
     elif mode == "PreCompact":
         precompact(hook)
-    elif mode == "compact":
-        compact(hook)
-    else:
-        sys.exit(f"usage: funnel.py Stop|PostToolUse|PreCompact|compact  (got {mode!r})")
+    elif mode == "compact" and not GROK or mode == "PostCompact" and GROK:
+        compact(hook)  # Claude Code and Codex re-inject at SessionStart:compact; Grok only has PostCompact
+    elif mode not in ("compact", "PostCompact"):
+        sys.exit(f"usage: funnel.py Stop|PostToolUse|PreCompact|PostCompact|compact  (got {mode!r})")

@@ -62,7 +62,10 @@ codex plugin add elephant-mode@elephant-mode
 
 Reinicia Codex, ejecuta `/hooks` y aprueba los cuatro hooks de elephant-mode (Codex no los corre hasta que los revisas). El % de contexto, el tamaño de la ventana y los límites de 5 horas y semanal se leen del propio registro de sesión de Codex, así que los guardados al 80 % y 85 % funcionan igual que en Claude Code. Diferencias: la memoria va a un archivo `memory.md` en la carpeta de datos del plugin (la memoria interna de Codex no se toca), no hay statusline ni medidor, y el plugin no cambia el umbral de autocompactado de Codex (`model_auto_compact_token_limit` en `config.toml` lo decides tú).
 
-## Cómo funciona
+### Grok CLI (beta)
+
+Instálalo desde este repo con el instalador de plugins de Grok y abre una sesión nueva. En la primera sesión el plugin añade su statusline a `~/.grok/config.toml` (solo si no tienes una; antes guarda una copia) y nunca toca `~/.claude`. El % de contexto sale de esa statusline, así que el guardado al 80 % funciona; Grok no informa límites de 5 horas ni semanales, así que esos guardados no aplican. Después de compactar, el hook `PostCompact` de Grok le recuerda al modelo sus notas. La memoria va a `memory.md` en la carpeta de datos del plugin. Grok ya autocompacta al 85 % por defecto, así que ese ajuste no se toca.
+
 
 Usa solo funciones oficiales de Claude Code: hooks, línea de estado y auto-compact. No llama a ninguna API ni evade los límites de uso: solo los muestra y te ayuda a no perder trabajo.
 

@@ -56,4 +56,27 @@ with tempfile.TemporaryDirectory() as tmp:
     assert subprocess.run([sys.executable, str(plugin / "scripts" / "setup.py"), "remove"], capture_output=True,
                           env=env).returncode != 0 and (cfg / "settings.json").read_text() == broken, "so does remove"
 
+    # Grok: never touches ~/.claude; adds its statusline to ~/.grok/config.toml only if there is none, and removes it
+    home = tmp / "home"
+    (home / ".grok").mkdir(parents=True)
+    (home / ".grok" / "config.toml").write_text('[model]\nname = "grok-4"\n')
+    for f in cfg.iterdir():
+        f.unlink()
+    shutil.rmtree(data, ignore_errors=True)
+    genv = {**env, "HOME": str(home), "USERPROFILE": str(home), "GROK_PLUGIN_ROOT": str(plugin)}
+    grun = lambda mode: subprocess.run([sys.executable, str(plugin / "scripts" / "setup.py"), mode], env=genv,
+                                       capture_output=True, text=True, encoding="utf-8", check=True).stdout
+    assert grun("ensure") == "", "Grok ignores SessionStart output: print nothing"
+    assert not (cfg / "settings.json").exists(), "no ~/.claude/settings.json on Grok"
+    toml = (home / ".grok" / "config.toml").read_text()
+    assert toml.startswith('[model]\nname = "grok-4"\n') and "[ui.status_line]" in toml and "statusline.py" in toml, toml
+    grun("ensure")
+    assert (home / ".grok" / "config.toml").read_text() == toml, "idempotent"
+    grun("remove")
+    assert (home / ".grok" / "config.toml").read_text() == '[model]\nname = "grok-4"\n', "remove restores it"
+    mine = '[ui.status_line]\ntype = "command"\ncommand = "my-line"\n'
+    (home / ".grok" / "config.toml").write_text(mine)
+    grun("ensure")
+    assert (home / ".grok" / "config.toml").read_text() == mine, "never overrides the user's Grok statusline"
+
 print("ok: all setup checks passed")

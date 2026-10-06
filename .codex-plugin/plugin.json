@@ -1,6 +1,6 @@
 {
   "name": "elephant-mode",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Elephants never forget: saves Codex's memory and continuity notes before it auto-compacts. Local only, no network.",
   "author": {
     "name": "John Sipamocha",

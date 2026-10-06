@@ -24,8 +24,9 @@ try:
 except ValueError:
     sys.exit(0)
 save(DATA / "latest.json", raw)  # the screen and the account-wide limits read this
-if j.get("session_id"):
-    save(DATA / "sessions" / f"{j['session_id']}.json", raw)  # exact window size per session
+sid = j.get("session_id") or j.get("sessionId")  # Grok may use camelCase
+if sid:
+    save(DATA / "sessions" / f"{sid}.json", raw)  # exact window size per session
 
 ctx = (j.get("context_window") or {}).get("used_percentage") or 0
 rl = j.get("rate_limits") or {}
