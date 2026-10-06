@@ -113,6 +113,8 @@ The first command removes only what the plugin added (its statusline and the com
 
 **How is this different from claude-mem?** [claude-mem](https://github.com/thedotmack/claude-mem) is a full persistent-memory system that records everything and compresses it with AI. elephant-mode is the opposite size: a few small scripts, no dependencies, no database, built on Claude Code's own memory. It does one thing, which is to save memory *before* compaction and at a threshold you choose. They can be used together.
 
+**Is the save guaranteed?** No. The plugin *asks* Claude to write its memory and notes, and Claude almost always does, but a hook can't write them for it (only the model knows what matters). If the turn is cut off first, nothing is saved. `log.jsonl` in the plugin data folder records each request and, at the next compaction, whether the notes were actually written.
+
 **Does it cost extra tokens?** One extra step per compaction cycle, while Claude writes its notes. Compacting earlier then makes every following message lighter.
 
 **Why does the gauge have no close button?** It's meant to stay visible. Drag it to any corner, or uninstall the plugin to remove it.

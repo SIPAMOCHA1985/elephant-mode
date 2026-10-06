@@ -110,6 +110,14 @@ def memory_path(transcript):
     return DATA / "memory.md" if CODEX else Path(transcript).parent / "memory"
 
 
+def log(sid, **event):
+    """One line per save request and per compaction in DATA/log.jsonl, so you can see whether Claude obeyed.
+    ponytail: never rotated; it grows a few lines per compaction, trim by hand if it ever matters."""
+    DATA.mkdir(parents=True, exist_ok=True)
+    with open(DATA / "log.jsonl", "a", encoding="utf-8") as f:
+        f.write(json.dumps({"time": time.strftime("%Y-%m-%dT%H:%M:%S"), "session": sid, **event}) + "\n")
+
+
 def check(h, event):
     if h.get("stop_hook_active"):  # Claude is already acting on our reason: don't loop
         return
@@ -132,7 +140,9 @@ def check(h, event):
 
     if not reasons:
         return
+    flags["requested_at"] = time.time()
     write_json(flag_file, flags)
+    log(sid, event="save_requested", reason="; ".join(reasons))
     msg = INSTRUCTION.format(reason="; ".join(reasons),
                              memory=memory_path(transcript),
                              continuity=DATA / "continuity" / f"{sid}.md")
@@ -148,7 +158,11 @@ def precompact(h):
     flag_file = DATA / "flags" / f"{sid}.json"
     flags = read_json(flag_file)
     flags.pop("ctx", None)  # after compaction the context threshold counts again
+    asked = flags.pop("requested_at", None)
     write_json(flag_file, flags)
+    notes = DATA / "continuity" / f"{sid}.md"
+    log(sid, event="compact", trigger=h.get("trigger"), save_requested=asked is not None,
+        notes_written=bool(asked) and notes.is_file() and notes.stat().st_mtime >= asked)
 
     src = Path(h.get("transcript_path") or "")
     if BACKUPS and src.is_file():

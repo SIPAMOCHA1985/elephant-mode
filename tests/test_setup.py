@@ -47,4 +47,13 @@ with tempfile.TemporaryDirectory() as tmp:
     run("remove")
     assert settings() == mine, "remove doesn't touch what it didn't add"
 
+    # a settings.json that isn't valid JSON (comments, typo) is never rewritten, by ensure or by remove
+    broken = '{"model": "opus", // my comment\n}'
+    (cfg / "settings.json").write_text(broken)
+    shutil.rmtree(data)
+    assert "isn't valid JSON" in run("ensure")
+    assert (cfg / "settings.json").read_text() == broken, "ensure leaves an invalid settings.json alone"
+    assert subprocess.run([sys.executable, str(plugin / "scripts" / "setup.py"), "remove"], capture_output=True,
+                          env=env).returncode != 0 and (cfg / "settings.json").read_text() == broken, "so does remove"
+
 print("ok: all setup checks passed")

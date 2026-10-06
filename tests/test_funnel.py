@@ -63,6 +63,16 @@ with tempfile.TemporaryDirectory() as tmp:
     assert "weekly usage limit is at 90%" in run("Stop", hook(low, "lim"), data)["reason"]
     assert run("Stop", hook(low, "lim"), data) == "", "limit fires once per window"
 
+    # log: a save request, then a compaction that tells whether the notes were written in between
+    log = lambda: [json.loads(l) for l in (data / "log.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert run("Stop", hook(high, "obey"), data)["decision"] == "block"
+    run("PreCompact", hook(high, "obey"), data)
+    assert log()[-1]["save_requested"] and not log()[-1]["notes_written"], "asked but no notes: visible in the log"
+    run("Stop", hook(high, "obey"), data)
+    (data / "continuity" / "obey.md").write_text("notes")
+    run("PreCompact", hook(high, "obey"), data)
+    assert log()[-1]["notes_written"] and log()[-2]["event"] == "save_requested", log()[-2:]
+
     (data / "continuity").mkdir(exist_ok=True)
     (data / "continuity" / "s1.md").write_text("notes")
     assert "s1.md" in run("compact", hook(high), data), "points Claude at its notes after compaction"

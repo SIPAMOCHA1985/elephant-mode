@@ -36,6 +36,18 @@ def load(path):
         return {}
 
 
+def load_settings():
+    """The user's settings, {} if there are none, or None if the file exists but isn't a JSON object
+    (comments, a typo, half-written): then it must not be rewritten, or the user's settings are lost."""
+    if not SETTINGS.exists():
+        return {}
+    try:
+        s = json.loads(SETTINGS.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return s if isinstance(s, dict) else None
+
+
 def dump(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
@@ -56,10 +68,14 @@ def ensure():
         shutil.copy2(ROOT / "scripts" / name, DATA / name)
     state = load(STATE)
     notes = []
-    if not state.get("configured"):
+    s = None if state.get("configured") else load_settings()
+    if not state.get("configured") and s is None:
+        print(f"[elephant-mode] {SETTINGS} isn't valid JSON, so the plugin left it untouched: no statusline and no "
+              "earlier auto-compact yet (the memory save still works). Tell the user briefly; the setup runs "
+              "on the first session after the file is fixed.")
+    elif not state.get("configured"):
         if SETTINGS.exists() and not (DATA / "settings.backup.json").exists():
             shutil.copy2(SETTINGS, DATA / "settings.backup.json")
-        s = load(SETTINGS) if SETTINGS.exists() else {}
         if not s.get("statusLine"):
             s["statusLine"] = {"type": "command", "command": statusline_cmd(), "refreshInterval": 5}
             state["statusLine"] = True
@@ -106,7 +122,9 @@ def open_gauge():
 
 def remove():
     state = load(STATE)
-    s = load(SETTINGS)
+    s = load_settings()
+    if s is None:
+        sys.exit(f"elephant-mode: {SETTINGS} isn't valid JSON, so it was left untouched. Fix it and run this again.")
     if state.get("statusLine") and (s.get("statusLine") or {}).get("command") in (statusline_cmd(), LEGACY_CMD):
         del s["statusLine"]
     if state.get("env") and ENV_KEY in s.get("env", {}):
